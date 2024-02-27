@@ -15,14 +15,22 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::post("/register",[AuthController::class,"register"]);
-Route::post("/login",[AuthController::class,"login"]);
-Route::post('/logout', [AuthController::class, 'logout']);
-Route::get("/tasks",[TaskController::class,"index"]);
-Route::get("/tasks/{id}",[TaskController::class,"show"]);
-Route::post("/tasks",[TaskController::class,"store"]);
-Route::put("/tasks/{id}",[TaskController::class,"update"]);
-Route::delete("/tasks/{id}",[TaskController::class,"delete"]);
+
+
+    Route::post("/register",[AuthController::class,"register"]);
+    Route::post("/login",[AuthController::class,"login"]);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+
+    // Route::get("/tasks",[TaskController::class,"index"]);
+    // Route::get("/tasks/{id}",[TaskController::class,"show"]);
+    // Route::post("/tasks",[TaskController::class,"store"]);
+    // Route::put("/tasks/{id}",[TaskController::class,"update"]);
+    // Route::delete("/tasks/{id}",[TaskController::class,"delete"]);
+    Route::apiResource("tasks",TaskController::class);
+    Route::put("/tasks/changeTaskToCompleted/{id}",[TaskController::class,"changeTaskToCompleted"]);
+    Route::put("/tasks/changeTaskToInProgress/{id}",[TaskController::class,"changeTaskToInProgress"]);
+    Route::put("/tasks/changeTaskToToDo/{id}",[TaskController::class,"changeTaskToToDo"]);
 
 
 

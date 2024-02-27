@@ -24,7 +24,7 @@ class UserRepository
 
     public function getById(int $id)
     {
-        return User::findOrFail($id);
+        return User::find($id);
     }
     public function getByEmail(string $email)
     {

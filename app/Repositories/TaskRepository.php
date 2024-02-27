@@ -19,12 +19,12 @@ class TaskRepository
 
     public function delete(Task $Task)
     {
-        $Task->delete();
+        return $Task->delete();
     }
 
     public function getById(int $id)
     {
-        return Task::findOrFail($id);
+        return Task::find($id);
     }
     public function getByUserId(int $id)
     {
