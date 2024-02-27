@@ -8,7 +8,7 @@ use App\Repositories\TaskRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Resources\TaskResource;
-
+use OpenApi\Annotations as OA;
 class TaskController extends Controller
 {
 
@@ -137,7 +137,7 @@ class TaskController extends Controller
         return response()->json([
             "status" => true
             ,
-            "task" => TaskResource::collection($task)
+            "task" => TaskResource::collection([$task])
             ,
             "message" => "task created with success"
         ], 201);
@@ -198,7 +198,7 @@ class TaskController extends Controller
                 $this->authorize('show', $task);
                 return response()->json([
                     "status" => true,
-                    "task" => $task
+                    "task" => TaskResource::collection([$task])
                 ], 200);
             } else {
                 return response()->json([
@@ -286,7 +286,7 @@ class TaskController extends Controller
 
                 "status" => true
                 ,
-                "task" => $task
+                "task" => TaskResource::collection([$task])
                 ,
                 "message" => "task updates success"
 
@@ -335,7 +335,7 @@ class TaskController extends Controller
  * )
  */
 
-    function delete(int $id)
+    function destroy(int $id)
     {
         try {
             $task = $this->TaskRepository->getById($id);
@@ -408,7 +408,7 @@ class TaskController extends Controller
 
                 "status" => true
                 ,
-                "task" => TaskResource::collection($task)
+                "task" => TaskResource::collection([$task])
                 ,
                 "message" => "task updates success"
 
@@ -476,7 +476,7 @@ class TaskController extends Controller
 
                 "status" => true
                 ,
-                "task" => TaskResource::collection($task)
+                "task" => TaskResource::collection([$task])
                 ,
                 "message" => "task updates success"
 
@@ -551,7 +551,7 @@ class TaskController extends Controller
 
                 "status" => true
                 ,
-                "task" => TaskResource::collection($task)
+                "task" => TaskResource::collection([$task])
                 ,
                 "message" => "task updates success"
 

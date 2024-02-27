@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
-
+use OpenApi\Annotations as OA;
 class AuthController extends Controller
 {
     private $userRepository;
