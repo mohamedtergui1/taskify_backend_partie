@@ -9,7 +9,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Resources\TaskResource;
 
-
+/**
+ * @OA\Tag(
+ *     name="Tasks",
+ *     description="Endpoints for managing tasks"
+ * )
+ */
 class TaskController extends Controller
 {
 
@@ -20,6 +25,24 @@ class TaskController extends Controller
         $this->TaskRepository = $taskRepository;
         $this->middleware('auth:sanctum');
     }
+
+
+
+     /**
+     * @OA\Get(
+     *     path="/api/task",
+     *     summary="List all tasks",
+     *     tags={"Tasks"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="A list of tasks",
+     *         )
+     *     ),
+     *     @OA\Response(response="404", description="No tasks found")
+     * )
+     */
+
 
     function index()
     {
@@ -39,6 +62,24 @@ class TaskController extends Controller
             ]);
     }
 
+     /**
+     * @OA\Post(
+     *     path="/api/task",
+     *     summary="Create a new task",
+     *     tags={"Tasks"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data for creating a new task"
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Task created successfully"
+     *     ),
+     *     @OA\Response(response="400", description="Bad request"),
+     *     @OA\Response(response="422", description="Validation error")
+     * )
+     */
     function store(TaskRequest $request)
     {
 
@@ -64,7 +105,26 @@ class TaskController extends Controller
         ], 201);
 
     }
-
+      /**
+     * @OA\Get(
+     *     path="/api/task/{taskId}",
+     *     summary="Get details of a specific task",
+     *     tags={"Tasks"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="taskId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the task to retrieve"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Task details"
+     *     ),
+     *     @OA\Response(response="404", description="Task not found")
+     * )
+     */
    function show(int $id)
     {
         try {
@@ -92,6 +152,29 @@ class TaskController extends Controller
         }
     }
 
+
+     /**
+     * @OA\Put(
+     *     path="/api/task/{taskId}",
+     *     summary="Update a specific task",
+     *     tags={"Tasks"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="taskId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer"),
+     *         description="ID of the task to update"
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data for updating the task"
+     *     ),
+     *     @OA\Response(response="200", description="Task updated successfully"),
+     *     @OA\Response(response="404", description="Task not found"),
+     *     @OA\Response(response="422", description="Validation error")
+     * )
+     */
     function update(TaskRequest $request, int $id)
     {
         try {
@@ -128,7 +211,23 @@ class TaskController extends Controller
         }
     }
 
-
+       /**
+ * @OA\Delete(
+ *     path="/api/task/{taskId}",
+ *     summary="Delete a specific task",
+ *     tags={"Tasks"},
+ *     security={{"bearerAuth":{}}},
+ *     @OA\Parameter(
+ *         name="taskId",
+ *         in="path",
+ *         required=true,
+ *         @OA\Schema(type="integer"),
+ *         description="ID of the task to delete"
+ *     ),
+ *     @OA\Response(response="200", description="Task deleted successfully"),
+ *     @OA\Response(response="404", description="Task not found")
+ * )
+ */
     function destroy(int $id)
     {
         try {
