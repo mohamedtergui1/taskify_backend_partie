@@ -8,7 +8,8 @@ use App\Repositories\TaskRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Access\AuthorizationException;
 use App\Http\Resources\TaskResource;
-use OpenApi\Annotations as OA;
+
+
 class TaskController extends Controller
 {
 
@@ -19,55 +20,6 @@ class TaskController extends Controller
         $this->TaskRepository = $taskRepository;
         $this->middleware('auth:sanctum');
     }
-    /**
- * @OA\Get(
- *      path="/api/tasks",
- *      operationId="getTasks",
- *      tags={"Tasks"},
- *      summary="Get user tasks",
- *      description="Returns tasks of the authenticated user.",
- *      @OA\Response(
- *          response=200,
- *          description="Successful operation",
- *          @OA\JsonContent(
- *              @OA\Property(
- *                  property="status",
- *                  type="boolean",
- *                  example="true"
- *              ),
- *              @OA\Property(
- *                  property="message",
- *                  type="string",
- *                  example="data found"
- *              ),
- *              @OA\Property(
- *                  property="data",
- *                  type="array",
- *                  @OA\Items(ref="#/components/schemas/TaskResource")
- *              )
- *          )
- *      ),
- *      @OA\Response(
- *          response=404,
- *          description="No tasks found",
- *          @OA\JsonContent(
- *              @OA\Property(
- *                  property="status",
- *                  type="boolean",
- *                  example="false"
- *              ),
- *              @OA\Property(
- *                  property="message",
- *                  type="string",
- *                  example="you don't have any tasks"
- *              )
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
 
     function index()
     {
@@ -86,37 +38,6 @@ class TaskController extends Controller
                 "message" => "you don't have any tasks"
             ]);
     }
-    /**
- * @OA\Post(
- *      path="/api/tasks",
- *      operationId="createTask",
- *      tags={"Tasks"},
- *      summary="Create a new task",
- *      description="Creates a new task for the authenticated user.",
- *      @OA\RequestBody(
- *          required=true,
- *          @OA\JsonContent(
- *              required={"name", "description", "start_date", "end_date"},
- *              @OA\Property(property="name", type="string", example="Task Name"),
- *              @OA\Property(property="description", type="string", example="Task Description"),
- *              @OA\Property(property="start_date", type="string", format="date", example="2024-02-27"),
- *              @OA\Property(property="end_date", type="string", format="date", example="2024-03-05"),
- *          ),
- *      ),
- *      @OA\Response(
- *          response=201,
- *          description="Task created successfully",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="task", type="object", ref="#/components/schemas/TaskResource"),
- *              @OA\Property(property="message", type="string", example="Task created with success")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
 
     function store(TaskRequest $request)
     {
@@ -144,52 +65,7 @@ class TaskController extends Controller
 
     }
 
-
-    /**
- * @OA\Get(
- *      path="/api/tasks/{id}",
- *      operationId="getTaskById",
- *      tags={"Tasks"},
- *      summary="Get a task by ID",
- *      description="Returns a task by its ID.",
- *      @OA\Parameter(
- *          name="id",
- *          in="path",
- *          description="ID of the task",
- *          required=true,
- *          @OA\Schema(type="integer", format="int64")
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Successful operation",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="task", ref="#/components/schemas/Task"),
- *          )
- *      ),
- *      @OA\Response(
- *          response=404,
- *          description="Task not found",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="Task not found")
- *          )
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="You are not authorized to view this task")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
-
-    function show(int $id)
+   function show(int $id)
     {
         try {
             $task = $this->TaskRepository->getById($id);
@@ -198,12 +74,14 @@ class TaskController extends Controller
                 $this->authorize('show', $task);
                 return response()->json([
                     "status" => true,
-                    "task" => TaskResource::collection([$task])
+                    "data" => new TaskResource($task),
+                    'message' => "the task is found"
                 ], 200);
             } else {
                 return response()->json([
                     "status" => false,
-                    "message" => "Task not found"
+                    'message' => "you don't have any tasks",
+                    'data' => []
                 ], 404);
             }
         } catch (AuthorizationException $e) {
@@ -213,55 +91,6 @@ class TaskController extends Controller
             ], 403);
         }
     }
-
-
-    /**
- * @OA\Put(
- *      path="/api/tasks/{id}",
- *      operationId="updateTask",
- *      tags={"Tasks"},
- *      summary="Update a task by ID",
- *      description="Updates a task by its ID.",
- *      @OA\Parameter(
- *          name="id",
- *          in="path",
- *          description="ID of the task",
- *          required=true,
- *          @OA\Schema(type="integer", format="int64")
- *      ),
- *      @OA\RequestBody(
- *          required=true,
- *          @OA\JsonContent(
- *              required={"name", "status", "description", "start_date", "end_date"},
- *              @OA\Property(property="name", type="string", example="Updated Task Name"),
- *              @OA\Property(property="status", type="string", enum={"pending", "in_progress", "completed"}, example="in_progress"),
- *              @OA\Property(property="description", type="string", example="Updated Task Description"),
- *              @OA\Property(property="start_date", type="string", format="date", example="2024-02-27"),
- *              @OA\Property(property="end_date", type="string", format="date", example="2024-03-05"),
- *          ),
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Task updated successfully",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="task", ref="#/components/schemas/Task"),
- *              @OA\Property(property="message", type="string", example="Task updated successfully")
- *          )
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="You are not authorized to update this task")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
 
     function update(TaskRequest $request, int $id)
     {
@@ -286,7 +115,7 @@ class TaskController extends Controller
 
                 "status" => true
                 ,
-                "task" => TaskResource::collection([$task])
+                "data" => new TaskResource($task)
                 ,
                 "message" => "task updates success"
 
@@ -299,53 +128,20 @@ class TaskController extends Controller
         }
     }
 
-    /**
- * @OA\Delete(
- *      path="/api/tasks/{id}",
- *      operationId="deleteTask",
- *      tags={"Tasks"},
- *      summary="Delete a task by ID",
- *      description="Deletes a task by its ID.",
- *      @OA\Parameter(
- *          name="id",
- *          in="path",
- *          description="ID of the task",
- *          required=true,
- *          @OA\Schema(type="integer", format="int64")
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Task deleted successfully",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="message", type="string", example="Task deleted with success")
- *          )
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="You are not authorized to delete this task")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
 
     function destroy(int $id)
     {
         try {
             $task = $this->TaskRepository->getById($id);
             $this->authorize('delete', $task);
-            $this->TaskRepository->delete($task);
-            return response()->json([
-                "status" => true
-                ,
-                "message" => "task deleted with success"
-            ], 200);
+            if ($task) {
+                $this->TaskRepository->delete($task);
+                return response()->json([
+                    "status" => true
+                    ,
+                    "message" => "task deleted with success"
+                ], 200);
+            }
         } catch (AuthorizationException $e) {
             return response()->json([
                 "status" => false,
@@ -356,43 +152,6 @@ class TaskController extends Controller
 
 
 
-
-    /**
- * @OA\Put(
- *      path="/api/changeTaskToToDo/{id}",
- *      operationId="changeTaskToToDo",
- *      tags={"Tasks"},
- *      summary="Change task status to 'to do'",
- *      description="Changes the status of a task to 'to do' by its ID.",
- *      @OA\Parameter(
- *          name="id",
- *          in="path",
- *          description="ID of the task",
- *          required=true,
- *          @OA\Schema(type="integer", format="int64")
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Task status updated successfully",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="task", ref="#/components/schemas/Task"),
- *              @OA\Property(property="message", type="string", example="Task status updated successfully")
- *          )
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="You are not authorized to update this task")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
 
     function changeTaskToToDo(int $id)
     {
@@ -424,44 +183,6 @@ class TaskController extends Controller
 
 
 
-
-
-       /**
- * @OA\Put(
- *      path="/api/changeTaskToInProgress/{id}",
- *      operationId="changeTaskToToDo",
- *      tags={"Tasks"},
- *      summary="Change task status to 'to do'",
- *      description="Changes the status of a task to 'to do' by its ID.",
- *      @OA\Parameter(
- *          name="id",
- *          in="path",
- *          description="ID of the task",
- *          required=true,
- *          @OA\Schema(type="integer", format="int64")
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Task status updated successfully",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="task", ref="#/components/schemas/Task"),
- *              @OA\Property(property="message", type="string", example="Task status updated successfully")
- *          )
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="You are not authorized to update this task")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
 
     function changeTaskToInProgress(int $id)
     {
@@ -498,46 +219,7 @@ class TaskController extends Controller
 
 
 
-
-
-       /**
- * @OA\Put(
- *      path="/api/changeTaskToCompleted/{id}",
- *      operationId="changeTaskToToDo",
- *      tags={"Tasks"},
- *      summary="Change task status to 'to do'",
- *      description="Changes the status of a task to 'to do' by its ID.",
- *      @OA\Parameter(
- *          name="id",
- *          in="path",
- *          description="ID of the task",
- *          required=true,
- *          @OA\Schema(type="integer", format="int64")
- *      ),
- *      @OA\Response(
- *          response=200,
- *          description="Task status updated successfully",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="true"),
- *              @OA\Property(property="task", ref="#/components/schemas/Task"),
- *              @OA\Property(property="message", type="string", example="Task status updated successfully")
- *          )
- *      ),
- *      @OA\Response(
- *          response=403,
- *          description="Forbidden",
- *          @OA\JsonContent(
- *              @OA\Property(property="status", type="boolean", example="false"),
- *              @OA\Property(property="message", type="string", example="You are not authorized to update this task")
- *          )
- *      ),
- *      security={
- *          {"bearerAuth": {}}
- *      }
- * )
- */
-
-    function changeTaskToCompleted(int $id)
+   function changeTaskToCompleted(int $id)
     {
         try {
             $task = $this->TaskRepository->getById($id);

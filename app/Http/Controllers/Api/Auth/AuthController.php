@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
-use OpenApi\Annotations as OA;
+
 class AuthController extends Controller
 {
     private $userRepository;
@@ -164,16 +164,24 @@ class AuthController extends Controller
          *     security={{"bearerAuth":{}}}
          * )
          */
-    public function logout(Request $request)
-    {
-        $request->user()->currentAccessToken()->delete();
+        public function logout(Request $request)
+        {
+            $user = Auth::user();
 
-        return response()->json([
-            "status" => true
-            ,
-            "data" => null
-            ,
-            'message' => 'Successfully logged out']);
-    }
+            if ($user) {
+                $user->tokens()->delete();
+                Auth::guard('web')->logout();  
 
+                return response()->json([
+                    "status" => true,
+                    "data" => null,
+                    'message' => 'User logged out successfully'
+                ]);
+            } else {
+                return response()->json([
+                    "status" => false,
+                    "message" => 'No user is currently authenticated'
+                ], 401);
+            }
+        }
 }
